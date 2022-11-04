@@ -99,20 +99,28 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedido = pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
         pedidoRepository.delete(pedido);
     }
-
-    //Ajustar
     @Override
     public PedidoDTO update(String id, PedidoForm pedidoForm) throws RegisterNotFoundException {
         UUID uuid = UUID.fromString(id);
         Pedido pedido = pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
 
+        pedido.setDescricao(pedidoForm.getDescricao());
+        pedido.setSituacao(pedidoForm.getSituacao());
+
         List<ItensPedido> itensPedidos = new ArrayList<>();
         pedidoForm.getItensPedido().forEach(p -> {
-            Produto produto = produtoRepository.findById(UUID.fromString(p.getIdProduto()))
+            ItensPedido item = new ItensPedido();
+            item.setId(UUID.fromString(p.getIdItemPedido()));
+
+            Produto produto = produtoRepository
+                    .findById(UUID.fromString(p.getIdProduto()))
                     .orElseThrow(() -> new RegisterNotFoundException(UUID.fromString(p.getIdProduto())));
 
-            ItensPedido itemPedido = p.toEntity(pedido, produto, p.getQuantidade());
-            itensPedidos.add(itemPedido);
+            item.setProduto(produto);
+            item.setQuantidade(p.getQuantidade());
+            item.setPedido(pedido);
+
+            itensPedidos.add(item);
         });
 
         pedido.setItensPedido(itensPedidos);

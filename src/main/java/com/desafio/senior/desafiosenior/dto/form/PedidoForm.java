@@ -1,11 +1,8 @@
 package com.desafio.senior.desafiosenior.dto.form;
 
-import com.desafio.senior.desafiosenior.dto.PedidoDTO;
 import com.desafio.senior.desafiosenior.enums.Situacao;
 import com.desafio.senior.desafiosenior.model.ItensPedido;
 import com.desafio.senior.desafiosenior.model.Pedido;
-import com.desafio.senior.desafiosenior.model.Produto;
-import com.desafio.senior.desafiosenior.repository.ProdutoRepository;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
