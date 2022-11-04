@@ -1,4 +1,4 @@
-package com.desafio.senior.desafiosenior.exeption;
+package com.desafio.senior.desafiosenior.exception;
 
 public class ItemInativoException extends RuntimeException {
 

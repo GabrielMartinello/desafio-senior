@@ -1,8 +1,8 @@
 package com.desafio.senior.desafiosenior.config;
 
 import com.desafio.senior.desafiosenior.dto.form.ErroForm;
-import com.desafio.senior.desafiosenior.exeption.ItemInativoException;
-import com.desafio.senior.desafiosenior.exeption.RegisterNotFoundException;
+import com.desafio.senior.desafiosenior.exception.ItemInativoException;
+import com.desafio.senior.desafiosenior.exception.RegisterNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
