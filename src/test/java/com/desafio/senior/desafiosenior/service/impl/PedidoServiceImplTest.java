@@ -1,10 +1,12 @@
 package com.desafio.senior.desafiosenior.service.impl;
 
+import com.desafio.senior.desafiosenior.dto.ItensPedidoDTO;
 import com.desafio.senior.desafiosenior.dto.PedidoDTO;
 import com.desafio.senior.desafiosenior.dto.form.ItensPedidoForm;
 import com.desafio.senior.desafiosenior.dto.form.PedidoForm;
 import com.desafio.senior.desafiosenior.enums.Situacao;
 import com.desafio.senior.desafiosenior.enums.TipoProduto;
+import com.desafio.senior.desafiosenior.exception.ItemInativoException;
 import com.desafio.senior.desafiosenior.exception.RegisterNotFoundException;
 import com.desafio.senior.desafiosenior.model.ItensPedido;
 import com.desafio.senior.desafiosenior.model.Pedido;
@@ -43,7 +45,7 @@ class PedidoServiceImplTest {
     private ProdutoRepository produtoRepository;
 
     private PedidoForm pedidoForm;
-    private List<ItensPedidoForm> itensPedido;
+    private ItensPedidoForm itemPedido;
     private PedidoDTO dto;
     private Produto produto;
     private Pedido pedido;
@@ -52,16 +54,15 @@ class PedidoServiceImplTest {
 
     @BeforeEach
     void setup() {
-        ItensPedidoForm itemPedido = new ItensPedidoForm();
+        itemPedido = new ItensPedidoForm();
         itemPedido.setIdProduto(UUID.randomUUID().toString());
         itemPedido.setQuantidade(BigDecimal.TEN);
 
         pedidoForm = new PedidoForm();
         pedidoForm.setDescricao("DESC");
+        pedidoForm.setSituacao(Situacao.A);
         pedidoForm.setItensPedido(List.of(itemPedido));
 
-        dto = new PedidoDTO();
-        dto.setDescricao("DESC");
 
         produto = new Produto();
         produto.setId(UUID.fromString(itemPedido.getIdProduto()));
@@ -76,6 +77,11 @@ class PedidoServiceImplTest {
         pedido.setId(UUID.randomUUID());
         pedido.setDescricao("DESC");
         pedido.setItensPedido(List.of(itemPedEntity));
+
+        dto = new PedidoDTO();
+        dto.setDescricao("DESC");
+        dto.setSituacao(Situacao.A);
+        dto.setItensPedido(ItensPedidoDTO.toDTOFromList(List.of(itemPedEntity)));
 
         pageable = Mockito.mock(Pageable.class);
 
@@ -163,9 +169,16 @@ class PedidoServiceImplTest {
     }
 
     @Test
-    void testSaveEnityItemPedidoNotFound() {
+    void testSaveEntityItemPedidoNotFound() {
         Mockito.when(produtoRepository.findById(Mockito.any())).thenThrow(RegisterNotFoundException.class);
         Assertions.assertThrows(RegisterNotFoundException.class, () -> service.save(pedidoForm));
+    }
+
+    @Test
+    void testSaveEntityItemPedidoInativo() {
+        produto.setInativo(Boolean.TRUE);
+        Mockito.when(produtoRepository.findById(Mockito.any())).thenReturn(Optional.of(produto));
+        Assertions.assertThrows(ItemInativoException.class, () -> service.save(pedidoForm));
     }
 
     @Test
@@ -199,5 +212,16 @@ class PedidoServiceImplTest {
     void testFindall() {
         Mockito.when(pedidoRepository.filterPedido(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(Mockito.mock(Page.class));
         Assertions.assertDoesNotThrow(() -> service.findAll(pageable,  "DESCRICAO", Situacao.A));
+    }
+
+    @Test
+    void testUpdate() {
+        pedidoForm.setDescricao("UPDATE");
+        itemPedido.setIdItemPedido(pedido.getId().toString());
+        Mockito.when(produtoRepository.findById(Mockito.any())).thenReturn(Optional.of(produto));
+        Mockito.when(pedidoRepository.findById(Mockito.any())).thenReturn(Optional.of(pedido));
+        Mockito.when(pedidoRepository.save(Mockito.any())).thenReturn(pedido);
+        PedidoDTO retorno = Assertions.assertDoesNotThrow(() -> service.update(pedido.getId().toString(), pedidoForm));
+        Assertions.assertEquals("UPDATE", retorno.getDescricao());
     }
 }

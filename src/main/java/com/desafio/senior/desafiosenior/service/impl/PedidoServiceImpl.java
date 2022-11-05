@@ -5,6 +5,7 @@ import com.desafio.senior.desafiosenior.dto.form.ItensPedidoForm;
 import com.desafio.senior.desafiosenior.dto.form.PedidoForm;
 import com.desafio.senior.desafiosenior.enums.Situacao;
 import com.desafio.senior.desafiosenior.enums.TipoProduto;
+import com.desafio.senior.desafiosenior.exception.ItemInativoException;
 import com.desafio.senior.desafiosenior.exception.RegisterNotFoundException;
 import com.desafio.senior.desafiosenior.model.ItensPedido;
 import com.desafio.senior.desafiosenior.model.Pedido;
@@ -41,6 +42,10 @@ public class PedidoServiceImpl implements PedidoService {
             Produto produto = produtoRepository.findById(UUID.fromString(itemPedidoForm.getIdProduto()))
                     .orElseThrow(() -> new RegisterNotFoundException(UUID.fromString(itemPedidoForm.getIdProduto())));
 
+            if (Boolean.TRUE.equals(produto.isInativo())) {
+                throw new ItemInativoException();
+            }
+
             ItensPedido itemPedido = itemPedidoForm.toEntity(pedido, produto, itemPedidoForm.getQuantidade());
             itensPedidos.add(itemPedido);
         }
@@ -74,7 +79,7 @@ public class PedidoServiceImpl implements PedidoService {
         }
 
         BigDecimal valorTotalPedidoProdutos = BigDecimal.ZERO;
-        for (ItensPedido item: pedido.getItensPedido()) {
+        for (ItensPedido item : pedido.getItensPedido()) {
             if (TipoProduto.P.equals(item.getProduto().getTipoProduto())) {
                 valorTotalPedidoProdutos = item.getQuantidade().multiply(item.getProduto().getPreco());
             }
