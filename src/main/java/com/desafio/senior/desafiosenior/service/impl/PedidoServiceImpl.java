@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,11 +34,9 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    @Autowired
-    private ItensPedidoRepository itensPedidoRepository;
-
 
     @Override
+    @Transactional
     public PedidoDTO save(PedidoForm pedidoForm) throws RegisterNotFoundException {
         Pedido pedido = new Pedido();
         List<ItensPedido> itensPedidos = new ArrayList<>();
@@ -58,6 +57,7 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PedidoDTO> findAll(Pageable pageable, String descricao, Situacao situacao) {
         if (descricao != null || situacao != null) {
             return pedidoRepository.filterPedido(descricao, situacao, pageable);
@@ -67,12 +67,14 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PedidoDTO findById(String id) throws RegisterNotFoundException {
         UUID uuid = UUID.fromString(id);
         return new PedidoDTO(pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid)));
     }
 
     @Override
+    @Transactional
     public PedidoDTO aplicarDescontoPedido(String id, HashMap<String, BigDecimal> field) throws RegisterNotFoundException {
         BigDecimal desconto = field.get("desconto");
         Pedido pedido = pedidoRepository.findById(UUID.fromString(id)).get();
@@ -95,19 +97,22 @@ public class PedidoServiceImpl implements PedidoService {
             pedido.setDescontoTotal(valorDescontoTotal);
             pedidoRepository.save(pedido);
             return new PedidoDTO(pedido);
+        }
 
-        } else throw new RuntimeException("O desconto não foi aplicado, " +
+        throw new RuntimeException("O desconto não foi aplicado, " +
                 "pois ou o valor dos itens é zero, ou são produtos de serviço!");
     }
 
 
     @Override
+    @Transactional
     public void delete(String id) throws RegisterNotFoundException {
         UUID uuid = UUID.fromString(id);
         Pedido pedido = pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
         pedidoRepository.delete(pedido);
     }
     @Override
+    @Transactional
     public PedidoDTO update(String id, PedidoForm pedidoForm) throws RegisterNotFoundException {
         UUID uuid = UUID.fromString(id);
         Pedido pedido = pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
@@ -132,7 +137,6 @@ public class PedidoServiceImpl implements PedidoService {
         });
 
         pedido.setItensPedido(itensPedidos);
-        PedidoDTO.updateEntity(pedidoForm, pedido);
         pedidoRepository.save(pedido);
         return new PedidoDTO(pedido);
     }

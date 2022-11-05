@@ -1,5 +1,6 @@
 package com.desafio.senior.desafiosenior.service.impl;
 
+import com.desafio.senior.desafiosenior.dto.PedidoDTO;
 import com.desafio.senior.desafiosenior.dto.ProdutoDTO;
 import com.desafio.senior.desafiosenior.dto.form.ProdutoForm;
 import com.desafio.senior.desafiosenior.enums.TipoProduto;
@@ -40,9 +41,6 @@ class ProdutoServiceImplTest {
     private Produto produto;
 
     private ProdutoDTO dto;
-
-    private Boolean existsByPedido;
-
     private ItensPedido itensPedido;
 
     private Pedido pedido;
@@ -61,8 +59,6 @@ class ProdutoServiceImplTest {
         produto.setTipoProduto(TipoProduto.P);
         produto.setInativo(Boolean.FALSE);
         produto.setPreco(BigDecimal.TEN);
-
-        existsByPedido = Boolean.FALSE;
 
 
         dto = new ProdutoDTO();
@@ -104,12 +100,23 @@ class ProdutoServiceImplTest {
     }
 
     @Test
+    void testUpdateEntityProduto() {
+        produtoForm.setDescricao("Produto Update");
+        Mockito.when(produtoRepository.findById(Mockito.any())).thenReturn(Optional.of(produto));
+        Mockito.when(produtoRepository.save(Mockito.any())).thenReturn(produto);
+        ProdutoDTO produtoDTO = Assertions.assertDoesNotThrow(() -> produtoService.update(produto.getId().toString(), produtoForm));
+        Assertions.assertEquals("Produto Update", produtoDTO.getDescricao());
+
+    }
+
+    @Test
     void testDelete() {
         Mockito.when(produtoRepository.findById(Mockito.any())).thenReturn(Optional.of(produto));
+        Mockito.when(itensPedidoRepository.existsByProduto(Mockito.any())).thenReturn(Boolean.FALSE);
+
         Assertions.assertDoesNotThrow(() -> produtoService.delete(produto.getId().toString()));
         Mockito.verify(produtoRepository).delete(Mockito.any());
     }
-
 
 
 }

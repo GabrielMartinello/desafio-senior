@@ -20,7 +20,7 @@ import java.util.List;
 public class PedidoRepositoryCustomImpl implements PedidoRepositoryCustom {
 
     @Autowired
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     public Page<PedidoDTO> filterPedido(String descricao, Situacao situacao, Pageable pageable) {

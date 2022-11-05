@@ -18,7 +18,7 @@ import java.util.List;
 public class ProdutoRepositoryCustomImpl implements ProdutoRepositoryCustom {
 
     @Autowired
-    EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     public Page<ProdutoDTO> filterProduto(String descricao, BigDecimal preco, Pageable pageable) {

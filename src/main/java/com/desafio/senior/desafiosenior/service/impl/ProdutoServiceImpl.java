@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -25,10 +25,6 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Autowired
     private ItensPedidoRepository itensPedidoRepository;
 
-    public ProdutoServiceImpl(ProdutoRepository produtoRepository) {
-        this.produtoRepository = produtoRepository;
-    }
-
     @Override
     @Transactional
     public ProdutoDTO save(ProdutoForm produto) {
@@ -36,6 +32,7 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ProdutoDTO> findAll(Pageable pageable, String descricao, BigDecimal preco) {
         if (descricao != null || preco != null) {
             return produtoRepository.filterProduto(descricao, preco, pageable);
@@ -44,6 +41,7 @@ public class ProdutoServiceImpl implements ProdutoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProdutoDTO findById(String id) throws RegisterNotFoundException {
         UUID uuid = UUID.fromString(id);
         return new ProdutoDTO(produtoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid)));
@@ -62,10 +60,10 @@ public class ProdutoServiceImpl implements ProdutoService {
 
     @Override
     @Transactional
-    public Object update(String id, ProdutoForm produtoForm) throws RegisterNotFoundException {
+    public ProdutoDTO update(String id, ProdutoForm produtoForm) throws RegisterNotFoundException {
         UUID uuid = UUID.fromString(id);
         Produto produto = produtoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
         ProdutoForm.updateEntity(produtoForm, produto);
-        return produtoRepository.save(produto);
+        return new ProdutoDTO(produtoRepository.save(produto));
     }
 }

@@ -18,6 +18,6 @@ public interface ProdutoService {
 
     void delete(String id) throws RegisterNotFoundException;
 
-    Object update(String id, ProdutoForm produtoForm) throws RegisterNotFoundException;
+    ProdutoDTO update(String id, ProdutoForm produtoForm) throws RegisterNotFoundException;
 
 }

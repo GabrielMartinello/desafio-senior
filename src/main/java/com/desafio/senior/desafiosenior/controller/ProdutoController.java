@@ -48,7 +48,7 @@ public class ProdutoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody ProdutoForm produtoForm) throws RegisterNotFoundException {
+    public ResponseEntity<ProdutoDTO> update(@PathVariable("id") String id, @RequestBody ProdutoForm produtoForm) throws RegisterNotFoundException {
         return ResponseEntity.status(HttpStatus.OK).body(produtoService.update(id, produtoForm));
     }
 }
