@@ -2,9 +2,14 @@ package com.desafio.senior.desafiosenior.controller;
 
 import com.desafio.senior.desafiosenior.dto.PedidoDTO;
 import com.desafio.senior.desafiosenior.dto.form.PedidoForm;
-import com.desafio.senior.desafiosenior.exeption.RegisterNotFoundException;
+import com.desafio.senior.desafiosenior.enums.Situacao;
+import com.desafio.senior.desafiosenior.exception.RegisterNotFoundException;
 import com.desafio.senior.desafiosenior.service.PedidoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +21,8 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/pedido")
 public class PedidoController {
-    final PedidoService pedidoService;
-
-    public PedidoController(PedidoService pedidoService) {
-        this.pedidoService = pedidoService;
-    }
+    @Autowired
+    private PedidoService pedidoService;
 
     @PostMapping("/save")
     public ResponseEntity<PedidoDTO> save(@RequestBody @Valid PedidoForm pedido) throws RegisterNotFoundException {
@@ -28,10 +30,12 @@ public class PedidoController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Page<PedidoDTO>> findAll(@RequestParam("page") int page,
-                                                @RequestParam("size") int size) {
+    public ResponseEntity<Page<PedidoDTO>> findAll(@PageableDefault(sort = "descricao", direction = Sort.Direction.ASC, page = 0, size = 10) Pageable pageable,
+                                                   @RequestParam(required = false) String descricao,
+                                                   @RequestParam(required = false) Situacao situacao
+                                                   ) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(pedidoService.findAll(page, size));
+                .body(pedidoService.findAll(pageable, descricao, situacao));
     }
 
     @GetMapping("/{id}")
@@ -47,13 +51,13 @@ public class PedidoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletePedido(@PathVariable("id") String id) throws RegisterNotFoundException {
+    public ResponseEntity<String> deletePedido(@PathVariable("id") String id) throws RegisterNotFoundException {
         pedidoService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(String.format("Produto %s excluído com sucesso", id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updatePedido(@PathVariable("id") String id, @RequestBody PedidoForm pedidoForm) throws RegisterNotFoundException {
+    public ResponseEntity<PedidoDTO> updatePedido(@PathVariable("id") String id, @RequestBody PedidoForm pedidoForm) throws RegisterNotFoundException {
         return ResponseEntity.status(HttpStatus.OK).body(pedidoService.update(id, pedidoForm));
     }
 }
