@@ -1,9 +1,7 @@
 package com.desafio.senior.desafiosenior.dto.form;
 
-import com.desafio.senior.desafiosenior.dto.ProdutoDTO;
 import com.desafio.senior.desafiosenior.enums.TipoProduto;
 import com.desafio.senior.desafiosenior.model.Produto;
-import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
@@ -11,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Data
-@Builder
 public class ProdutoForm {
 
     @NotNull()

@@ -2,12 +2,17 @@ package com.desafio.senior.desafiosenior.dto;
 
 import com.desafio.senior.desafiosenior.enums.TipoProduto;
 import com.desafio.senior.desafiosenior.model.Produto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProdutoDTO {
 
     private String descricao;

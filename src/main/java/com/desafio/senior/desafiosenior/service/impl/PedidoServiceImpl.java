@@ -33,6 +33,9 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    @Autowired
+    private ItensPedidoRepository itensPedidoRepository;
+
 
     @Override
     public PedidoDTO save(PedidoForm pedidoForm) throws RegisterNotFoundException {
