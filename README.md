@@ -22,6 +22,7 @@ O projeto foi dividido em pastas, sendo elas:
 * model - Pasta com as entidades do banco.
 * repository - Pasta onde está localizada as interfaces implementadas com o JPARepository que faz comunicação com o banco, além disso, estas interfaces estão implementando as interfaces custom, onde é realizado as consultas com queryDSL
 * service - Pasta com os serviços que fazem a comunicação entre os controllers e os repositorys com as regras de negócio.
+* util - Pasta onde ficam as utilidades do sistema, neste caso o conversor de UUID
 * test - pasta onde estão localizadas os testes dos services.
 
 

@@ -2,9 +2,7 @@ package com.desafio.senior.desafiosenior.repository.impl;
 
 import com.desafio.senior.desafiosenior.dto.PedidoDTO;
 import com.desafio.senior.desafiosenior.enums.Situacao;
-import com.desafio.senior.desafiosenior.model.ItensPedido;
 import com.desafio.senior.desafiosenior.model.Pedido;
-import com.desafio.senior.desafiosenior.model.QItensPedido;
 import com.desafio.senior.desafiosenior.model.QPedido;
 import com.desafio.senior.desafiosenior.repository.PedidoRepositoryCustom;
 import com.querydsl.core.BooleanBuilder;

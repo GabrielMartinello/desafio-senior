@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface ItensPedidoRepository extends JpaRepository<ItensPedido, UUID> {
     Boolean existsByProduto(Produto produto);
+
+    void deleteByPedidoId(UUID uuid);
 }

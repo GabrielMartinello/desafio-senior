@@ -6,6 +6,7 @@ import com.desafio.senior.desafiosenior.exception.RegisterNotFoundException;
 import com.desafio.senior.desafiosenior.model.Produto;
 import com.desafio.senior.desafiosenior.repository.ItensPedidoRepository;
 import com.desafio.senior.desafiosenior.repository.ProdutoRepository;
+import com.desafio.senior.desafiosenior.util.DesafioSeniorUtil;
 import com.desafio.senior.desafiosenior.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -43,13 +44,13 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Override
     @Transactional(readOnly = true)
     public ProdutoDTO findById(String id) throws RegisterNotFoundException {
-        UUID uuid = UUID.fromString(id);
+        UUID uuid = DesafioSeniorUtil.toUUID(id);
         return new ProdutoDTO(produtoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid)));
     }
     @Override
     @Transactional
     public void delete(String id) throws RegisterNotFoundException {
-        UUID uuid = UUID.fromString(id);
+        UUID uuid = DesafioSeniorUtil.toUUID(id);
         Produto produto = produtoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
         if (itensPedidoRepository.existsByProduto(produto)) {
             throw new RuntimeException("Este produto já está incluído em um pedido!");
@@ -61,7 +62,7 @@ public class ProdutoServiceImpl implements ProdutoService {
     @Override
     @Transactional
     public ProdutoDTO update(String id, ProdutoForm produtoForm) throws RegisterNotFoundException {
-        UUID uuid = UUID.fromString(id);
+        UUID uuid = DesafioSeniorUtil.toUUID(id);
         Produto produto = produtoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
         ProdutoForm.updateEntity(produtoForm, produto);
         return new ProdutoDTO(produtoRepository.save(produto));

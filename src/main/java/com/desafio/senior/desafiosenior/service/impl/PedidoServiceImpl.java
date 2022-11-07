@@ -10,8 +10,10 @@ import com.desafio.senior.desafiosenior.exception.RegisterNotFoundException;
 import com.desafio.senior.desafiosenior.model.ItensPedido;
 import com.desafio.senior.desafiosenior.model.Pedido;
 import com.desafio.senior.desafiosenior.model.Produto;
+import com.desafio.senior.desafiosenior.repository.ItensPedidoRepository;
 import com.desafio.senior.desafiosenior.repository.PedidoRepository;
 import com.desafio.senior.desafiosenior.repository.ProdutoRepository;
+import com.desafio.senior.desafiosenior.util.DesafioSeniorUtil;
 import com.desafio.senior.desafiosenior.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,9 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    @Autowired
+    private ItensPedidoRepository itensPedidoRepository;
+
 
     @Override
     @Transactional
@@ -41,8 +46,8 @@ public class PedidoServiceImpl implements PedidoService {
         Pedido pedido = new Pedido();
         List<ItensPedido> itensPedidos = new ArrayList<>();
         for (ItensPedidoForm itemPedidoForm : pedidoForm.getItensPedido()) {
-            Produto produto = produtoRepository.findById(UUID.fromString(itemPedidoForm.getIdProduto()))
-                    .orElseThrow(() -> new RegisterNotFoundException(UUID.fromString(itemPedidoForm.getIdProduto())));
+            Produto produto = produtoRepository.findById(DesafioSeniorUtil.toUUID(itemPedidoForm.getIdProduto()))
+                    .orElseThrow(() -> new RegisterNotFoundException(DesafioSeniorUtil.toUUID(itemPedidoForm.getIdProduto())));
 
             if (Boolean.TRUE.equals(produto.isInativo())) {
                 throw new ItemInativoException();
@@ -69,15 +74,15 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional(readOnly = true)
     public PedidoDTO findById(String id) throws RegisterNotFoundException {
-        UUID uuid = UUID.fromString(id);
-        return new PedidoDTO(pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid)));
+        return new PedidoDTO(pedidoRepository.findById(DesafioSeniorUtil.toUUID(id))
+                .orElseThrow(() -> new RegisterNotFoundException(DesafioSeniorUtil.toUUID(id))));
     }
 
     @Override
     @Transactional
     public PedidoDTO aplicarDescontoPedido(String id, HashMap<String, BigDecimal> field) throws RegisterNotFoundException {
         BigDecimal desconto = field.get("desconto");
-        Pedido pedido = pedidoRepository.findById(UUID.fromString(id)).get();
+        Pedido pedido = pedidoRepository.findById(DesafioSeniorUtil.toUUID(id)).get();
 
         if (Situacao.F.equals(pedido.getSituacao())) {
             throw new RuntimeException("A situação do pedido está fechada!");
@@ -107,34 +112,44 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional
     public void delete(String id) throws RegisterNotFoundException {
-        UUID uuid = UUID.fromString(id);
-        Pedido pedido = pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
+        Pedido pedido = pedidoRepository.findById(DesafioSeniorUtil.toUUID(id))
+                .orElseThrow(() -> new RegisterNotFoundException(DesafioSeniorUtil.toUUID(id)));
         pedidoRepository.delete(pedido);
     }
     @Override
     @Transactional
     public PedidoDTO update(String id, PedidoForm pedidoForm) throws RegisterNotFoundException {
-        UUID uuid = UUID.fromString(id);
-        Pedido pedido = pedidoRepository.findById(uuid).orElseThrow(() -> new RegisterNotFoundException(uuid));
+        UUID uuid = DesafioSeniorUtil.toUUID(id);
+        Pedido pedido = pedidoRepository.findById(uuid)
+                .orElseThrow(() -> new RegisterNotFoundException(uuid));
 
         pedido.setDescricao(pedidoForm.getDescricao());
         pedido.setSituacao(pedidoForm.getSituacao());
 
         List<ItensPedido> itensPedidos = new ArrayList<>();
-        pedidoForm.getItensPedido().forEach(p -> {
-            ItensPedido item = new ItensPedido();
-            item.setId(UUID.fromString(p.getIdItemPedido()));
 
-            Produto produto = produtoRepository
-                    .findById(UUID.fromString(p.getIdProduto()))
-                    .orElseThrow(() -> new RegisterNotFoundException(UUID.fromString(p.getIdProduto())));
+        if (!pedidoForm.getItensPedido().isEmpty()) {
+            pedidoForm.getItensPedido().forEach(p -> {
+                if(p.getIdProduto() != null && !p.getIdProduto().isEmpty()) {
+                    ItensPedido item = new ItensPedido();
+                    item.setId(DesafioSeniorUtil.toUUID(p.getIdItemPedido()));
 
-            item.setProduto(produto);
-            item.setQuantidade(p.getQuantidade());
-            item.setPedido(pedido);
+                    Produto produto = produtoRepository
+                            .findById(DesafioSeniorUtil.toUUID(p.getIdProduto()))
+                            .orElseThrow(() -> new RegisterNotFoundException(DesafioSeniorUtil.toUUID(p.getIdProduto())));
 
-            itensPedidos.add(item);
-        });
+                    item.setProduto(produto);
+                    item.setQuantidade(p.getQuantidade());
+                    item.setPedido(pedido);
+
+                    itensPedidos.add(item);
+                } else if (!p.getIdItemPedido().isEmpty() && p.getIdItemPedido() != null) {
+                    itensPedidoRepository.deleteById(DesafioSeniorUtil.toUUID(p.getIdItemPedido()));
+                }
+            });
+        } else {
+            itensPedidoRepository.deleteByPedidoId(DesafioSeniorUtil.toUUID(id));
+        }
 
         pedido.setItensPedido(itensPedidos);
         pedidoRepository.save(pedido);
