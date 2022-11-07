@@ -26,7 +26,7 @@ O projeto foi dividido em pastas, sendo elas:
 * test - pasta onde estão localizadas os testes dos services.
 
 
-Para realizar o cálculo de desconto do pedido, foi desenvolvido uma rota para isso, que é passado na url o id do pedido e o percentual de desconto.
+Para realizar o cálculo de desconto do pedido, foi desenvolvido uma rota para isso, que é passado na url o id do pedido, e no body o percentual de desconto dentro do campo "desconto".
 
 Dentro da classe  PedidoServiceImpl (que implementa PedidoService) será verificado se o pedido está com status 'Aberto', caso contrário retorna um mensagem, alertando o usuário sobre isso. Caso todos os produtos do pedido forem do tipo 'Serviço', não será realizado o desconto, e também retornará uma mensagem de erro.
 
